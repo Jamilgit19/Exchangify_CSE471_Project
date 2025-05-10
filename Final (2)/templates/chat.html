@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 100;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .profile-header {
+            background-color: #2b4b8c;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .header-button {
+            background-color: #e9ecef;
+            color: #333;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        .user-list {
+            width: 30%;
+            border-right: 5px solid #2b4b8c;
+            overflow-y: auto;
+        }
+        .search-container {
+            padding: 10px;
+            border-bottom: 2px solid #000000;
+            display: flex;
+            align-items: center;
+        }
+        .search-icon {
+            margin-right: 10px;
+            color: #524747;
+        }
+        #userSearchInput {
+            border: 45;
+            flex-grow: 1;
+            padding: 8px;
+            outline: none;
+        }
+        .user-item {
+            padding: 15px;
+            border-bottom: 1px solid #4b4848;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .user-item:hover, .user-item.active {
+            background-color: #9afc86;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid #c058af;
+            display: flex;
+            align-items: center;
+        }
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .message {
+            max-width: 80%;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            position: relative;
+        }
+        .message-sent {
+            background-color: #0d6efd;
+            color: white;
+            margin-left: auto;
+            border-top-right-radius: 4px;
+        }
+        .message-received {
+            background-color: #f1f1f1;
+            border-top-left-radius: 4px;
+        }
+        .message-time {
+            font-size: 0.7rem;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+        .input-area {
+            padding: 15px;
+            border-top: 1px solid #ffffff;
+            display: flex;
+        }
+        #messageInput {
+            flex-grow: 1;
+            border: 100;
+            padding: 10px;
+            outline: none;
+        }
+        #sendButton {
+            border: none;
+            background-color: #0d6efd;
+            color: white;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with title, Home and Logout buttons -->
+    <div class="profile-header">
+        <h1 class="mb-0">Chat</h1>
+        <div class="header-buttons">
+            <a href="/home" class="header-button">Home</a>
+            <a href="/logout" class="header-button">Logout</a>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <!-- User list sidebar -->
+        <div class="user-list">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="userSearchInput" placeholder="Search users...">
+            </div>
+            <div id="userList">
+                <!-- User list will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Chat area -->
+        <div class="chat-area">
+            <div id="emptyState" class="empty-state">
+                <h4>Select a user to start chatting</h4>
+                <p>Choose a user from the list to begin a conversation</p>
+            </div>
+            
+            <div id="chatContent" style="display: none; height: 100%; flex-direction: column;">
+                <div class="chat-header" id="chatHeader">
+                    <!-- Selected user info will appear here -->
+                </div>
+                
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Messages will be populated here -->
+                </div>
+                
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type a message...">
+                    <button id="sendButton">send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Current user ID from session
+        const currentUserId = {{ session.user_id|tojson }};
+        let selectedUserId = null;
+        let users = [];
+        
+        // DOM elements
+        const userSearchInput = document.getElementById('userSearchInput');
+        const userList = document.getElementById('userList');
+        const emptyState = document.getElementById('emptyState');
+        const chatContent = document.getElementById('chatContent');
+        const chatHeader = document.getElementById('chatHeader');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        
+        // Load users on page load
+        window.addEventListener('DOMContentLoaded', loadUsers);
+        
+        // Search users
+        userSearchInput.addEventListener('input', filterUsers);
+        
+        // Send message
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Load all users
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users/search');
+                users = await response.json();
+                renderUsers(users);
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        // Filter users based on search input
+        function filterUsers() {
+            const query = userSearchInput.value.toLowerCase();
+            const filteredUsers = users.filter(user => 
+                user.name.toLowerCase().includes(query)
+            );
+            renderUsers(filteredUsers);
+        }
+        
+        // Render users in the sidebar
+        function renderUsers(usersList) {
+            userList.innerHTML = '';
+            
+            usersList.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = `user-item ${user.id === selectedUserId ? 'active' : ''}`;
+                
+                const firstLetter = user.name.charAt(0).toUpperCase();
+                
+                userItem.innerHTML = `
+                    <div class="user-avatar">${firstLetter}</div>
+                    <div>${user.name}</div>
+                `;
+                
+                userItem.addEventListener('click', () => selectUser(user));
+                userList.appendChild(userItem);
+            });
+        }
+        
+        // Select a user to chat with
+        function selectUser(user) {
+            selectedUserId = user.id;
+            
+            // Update UI
+            emptyState.style.display = 'none';
+            chatContent.style.display = 'flex';
+            
+            // Update chat header
+            const firstLetter = user.name.charAt(0).toUpperCase();
+            chatHeader.innerHTML = `
+                <div class="user-avatar">${firstLetter}</div>
+                <div>${user.name}</div>
+            `;
+            
+            // Highlight selected user in the list
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelectorAll('.user-item').forEach(item => {
+                if (item.textContent.includes(user.name)) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Load messages
+            loadMessages(user.id);
+        }
+        
+        // Load messages for the selected user
+        async function loadMessages(userId) {
+            try {
+                const response = await fetch(`/api/messages/${userId}`);
+                const messages = await response.json();
+                renderMessages(messages);
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+        
+        // Convert UTC time to Bangladesh time (UTC+6)
+        function convertToBangladeshTime(utcTimeString) {
+            const date = new Date(utcTimeString);
+            // Add 6 hours for Bangladesh time (UTC+6)
+            const bangladeshTime = new Date(date.getTime() + (6 * 60 * 60 * 1000));
+            return bangladeshTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        }
+        
+        // Render messages in the chat area
+        function renderMessages(messages) {
+            messagesContainer.innerHTML = '';
+            
+            messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                const isSent = message.senderId === currentUserId;
+                
+                messageElement.className = `message ${isSent ? 'message-sent' : 'message-received'}`;
+                
+                // Convert timestamp to Bangladesh time
+                const bangladeshTime = convertToBangladeshTime(message.timestamp);
+                
+                messageElement.innerHTML = `
+                    <div>${message.text}</div>
+                    <div class="message-time">${bangladeshTime}</div>
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+            });
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Send a new message
+        async function sendMessage() {
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText || !selectedUserId) return;
+            
+            try {
+                const response = await fetch('/api/messages/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        receiverId: selectedUserId,
+                        message: messageText
+                    })
+                });
+                
+                const newMessage = await response.json();
+                
+                // Add the new message to the UI
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message message-sent';
+                
+                // Convert timestamp to Bangladesh time
+                const bangladeshTime = convertToBangladeshTime(newMessage.timestamp);
+                
+                messageElement.innerHTML = `
+                    <div>${newMessage.text}</div>
+                    <div class="message-time">${bangladeshTime}</div>
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+                
+                // Clear input and scroll to bottom
+                messageInput.value = '';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        }
+    </script>
+</body>
+</html>

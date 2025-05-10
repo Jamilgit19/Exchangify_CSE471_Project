@@ -1,0 +1,178 @@
+/* General Styles */
+body {
+    background-color: #f4f4f4;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, #1e6ee1 0%, #1a237e 100%);
+    min-height: 100vh;
+}
+
+/* Login & Signup Styles */
+.container {
+    max-width: 500px;
+    padding: 20px;
+    margin-top: 50px;
+}
+
+.login-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+}
+
+.welcome-text {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.btn-login {
+    background-color: #ff7043;
+    color: white;
+    padding: 12px;
+    border: none;
+    font-weight: bold;
+}
+
+.btn-login:hover {
+    background-color: #f4511e;
+    color: white;
+}
+
+.input-group-text {
+    background-color: transparent;
+    border-right: none;
+    color: #6c757d;
+}
+
+.form-control {
+    border-left: 4px solid #ff7043;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #ff7043;
+}
+
+/* Dashboard Styles */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #e6eeff;
+    padding: 20px 0;
+}
+
+.sidebar-logo {
+    width: 60px;
+    height: 60px;
+    display: block;
+    margin: 0 auto 20px;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    margin-bottom: 5px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.nav-link:hover {
+    background-color: #d4e0ff;
+}
+
+.nav-icon {
+    margin-right: 10px;
+}
+
+.dropdown-icon {
+    margin-left: auto;
+    font-size: 12px;
+}
+
+.submenu {
+    list-style: none;
+    padding-left: 40px;
+    display: none;
+}
+
+.nav-item.active .submenu {
+    display: block;
+}
+
+.submenu li {
+    margin: 8px 0;
+}
+
+.submenu a {
+    color: #555;
+    text-decoration: none;
+}
+
+.submenu li.active a {
+    color: #1e6ee1;
+    font-weight: 500;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+.content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Table Styles */
+.table th {
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Editor Styles */
+.editor-toolbar {
+    display: flex;
+    gap: 5px;
+}
